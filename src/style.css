@@ -1,0 +1,244 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bmis-bg: #f3f6f9;
+  --bmis-card: #ffffff;
+  --bmis-teal: #00a389;
+  --bmis-green: #3abf94;
+  --bmis-green-hover: #2ea881;
+  --bmis-blue: #547fff;
+  --bmis-blue-hover: #436fe6;
+  --bmis-yellow: #ffc247;
+  --bmis-purple: #9964e3;
+  --bmis-red: #f55d5d;
+  --bmis-border: #d6dee5;
+  --bmis-table-header: #d6dee5;
+  --bmis-text: #29323a;
+  --bmis-label: #495057;
+  --bmis-muted: #798892;
+
+  --shift-p: #e9a23b;
+  --shift-p-bg: #fcefd9;
+  --shift-s: #4c7fd6;
+  --shift-s-bg: #e4ecfb;
+  --shift-m: #7c5cb4;
+  --shift-m-bg: #eee7f8;
+
+  --badge-eng: #c1622a;
+  --badge-eng-bg: #fbe4d6;
+  --badge-sec: #545e6e;
+  --badge-sec-bg: #e4e7ec;
+  --badge-hk: #2f9e8f;
+  --badge-hk-bg: #ddf3ef;
+  --badge-man: #8b4f72;
+  --badge-man-bg: #f2e2eb;
+}
+
+body {
+  margin: 0;
+  font-family: 'Montserrat', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--bmis-bg);
+  color: var(--bmis-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── TIPOGRAFI & GAYA DASAR BMIS ── */
+.page-heading {
+  font-size: 26px;
+  font-weight: 400;
+  color: var(--bmis-label);
+  margin: 0;
+  line-height: 1.25;
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a3a5c;
+}
+
+.widget-sub-desc {
+  font-size: 13px;
+  color: var(--bmis-muted);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+/* ── KARTU WIDGET BMIS ── */
+.bmis-widget-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+
+/* ── KONTROL FORM & DROPDOWN ── */
+.form-select-custom,
+.form-input-custom {
+  width: 100%;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--bmis-border);
+  padding: 0 12px;
+  font-size: 13px;
+  color: var(--bmis-text);
+  background-color: #ffffff;
+  outline: none;
+  transition: all 0.15s ease-in-out;
+}
+
+.form-select-custom:focus,
+.form-input-custom:focus {
+  border-color: var(--bmis-teal);
+  box-shadow: 0 0 0 3px rgba(0, 163, 137, 0.15);
+}
+
+.form-label-custom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--bmis-label);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.required-tag {
+  color: var(--bmis-red);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* ── TOMBOL STANDAR BMIS ── */
+.btn-bmis {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  white-space: nowrap;
+}
+
+.btn-bmis-yellow {
+  background: var(--bmis-yellow);
+  color: var(--bmis-text);
+}
+.btn-bmis-yellow:hover {
+  background: #f0b53a;
+}
+
+.btn-bmis-purple {
+  background: var(--bmis-purple);
+  color: #ffffff;
+}
+.btn-bmis-purple:hover {
+  background: #8952d4;
+}
+
+.btn-bmis-blue {
+  background: var(--bmis-blue);
+  color: #ffffff;
+}
+.btn-bmis-blue:hover {
+  background: var(--bmis-blue-hover);
+}
+
+.btn-bmis-green {
+  background: var(--bmis-green);
+  color: #ffffff;
+}
+.btn-bmis-green:hover {
+  background: var(--bmis-green-hover);
+}
+
+.btn-bmis-teal {
+  background: var(--bmis-teal);
+  color: #ffffff;
+}
+.btn-bmis-teal:hover {
+  background: #008f78;
+}
+
+.btn-bmis-red {
+  background: var(--bmis-red);
+  color: #ffffff;
+}
+.btn-bmis-red:hover {
+  background: #e04a4a;
+}
+
+/* ── BADGE DIVISI ── */
+.badge-divisi {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.badge-eng {
+  background: var(--badge-eng-bg);
+  color: var(--badge-eng);
+}
+
+.badge-sec {
+  background: var(--badge-sec-bg);
+  color: var(--badge-sec);
+}
+
+.badge-hk {
+  background: var(--badge-hk-bg);
+  color: var(--badge-hk);
+}
+
+.badge-man {
+  background: var(--badge-man-bg);
+  color: var(--badge-man);
+}
+
+/* ── LEGENDA SHIFT BULAT / KOTAK ── */
+.dot-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.dot-pagi {
+  background: var(--shift-p-bg);
+  color: var(--shift-p);
+  border: 1px solid #f3d4a4;
+}
+
+.dot-siang {
+  background: var(--shift-s-bg);
+  color: var(--shift-s);
+  border: 1px solid #bfd3f6;
+}
+
+.dot-malam {
+  background: var(--shift-m-bg);
+  color: var(--shift-m);
+  border: 1px solid #d5c4ef;
+}

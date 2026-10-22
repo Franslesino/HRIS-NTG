@@ -1,0 +1,125 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 208 17% 19%;
+    --card: 0 0% 100%;
+    --card-foreground: 208 17% 19%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 208 17% 19%;
+    --primary: 170 100% 32%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 169 47% 93%;
+    --secondary-foreground: 170 100% 27%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 169 47% 93%;
+    --accent-foreground: 170 100% 27%;
+    --destructive: 0 78% 66%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 160 54% 49%;
+    --success-foreground: 0 0% 100%;
+    --warning: 40 100% 64%;
+    --warning-foreground: 208 17% 19%;
+    --info: 225 100% 66%;
+    --info-foreground: 0 0% 100%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 170 100% 32%;
+    --chart-1: 170 100% 32%;
+    --chart-2: 225 100% 66%;
+    --chart-3: 40 100% 64%;
+    --chart-4: 265 69% 64%;
+    --chart-5: 0 78% 66%;
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 0 0% 95%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 0 0% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 208 24% 10%;
+    --foreground: 0 0% 98%;
+    --card: 208 22% 13%;
+    --card-foreground: 0 0% 98%;
+    --popover: 208 22% 13%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 170 90% 40%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 208 18% 18%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 208 18% 18%;
+    --muted-foreground: 208 12% 65%;
+    --accent: 208 18% 18%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --success: 160 54% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 40 90% 60%;
+    --warning-foreground: 208 24% 10%;
+    --info: 225 90% 66%;
+    --info-foreground: 0 0% 100%;
+    --border: 208 16% 22%;
+    --input: 208 16% 22%;
+    --ring: 170 90% 40%;
+    --chart-1: 170 90% 40%;
+    --chart-2: 225 90% 66%;
+    --chart-3: 40 90% 64%;
+    --chart-4: 265 69% 64%;
+    --chart-5: 0 78% 66%;
+
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    margin: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Sidebar navigation states — follows the S1. Komponen Gaji design */
+[data-sidebar='menu-button'][data-active='true'] {
+  background-color: hsl(var(--card));
+  color: hsl(var(--foreground));
+  font-weight: 500;
+  box-shadow: inset 0 0 0 1px hsl(var(--sidebar-border)), 0 1px 2px 0 rgb(15 23 42 / 0.04);
+}
+
+[data-sidebar='menu-button'][data-active='true']:hover {
+  background-color: hsl(var(--card));
+}
+
+[data-sidebar='menu-sub-button'][data-active='true'] {
+  background-color: hsl(var(--sidebar-accent));
+  color: hsl(var(--foreground));
+  font-weight: 500;
+}
+
+[data-sidebar='menu-sub-button'][data-active='true']:hover {
+  background-color: hsl(var(--sidebar-accent));
+}

@@ -120,7 +120,15 @@ const showToast = (msg: string) => {
 };
 
 // ── APPROVAL QUEUE TAB ──
-const approvalTab = ref<'cuti' | 'spkl' | 'swap'>('cuti');
+// Open the first queue that actually has pending items so the card is never
+// dominated by an empty state on load.
+const approvalTab = ref<'cuti' | 'spkl' | 'swap'>(
+  pendingLeaves.value.length
+    ? 'cuti'
+    : pendingOvertimes.value.length
+      ? 'spkl'
+      : 'swap',
+);
 
 const statusVariant = (status: string) => {
   const s = (status || '').toLowerCase();

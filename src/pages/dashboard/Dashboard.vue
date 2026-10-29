@@ -323,41 +323,15 @@ const submitManualPresensi = () => {
 
         <!-- Inner Content Box -->
         <div class="bg-slate-50/70 border border-slate-100 rounded-xl p-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          <!-- Sparkline & Rate -->
-          <div class="flex flex-col justify-between">
-            <div>
-              <span class="text-[10px] text-slate-500 font-medium block">Tren Kehadiran Hari Ini</span>
-              <div class="flex items-baseline gap-2 mt-0.5">
-                <span class="text-2xl font-bold text-slate-800 tracking-tight">{{ attendancePercentage }}%</span>
-                <span class="text-[10px] font-bold text-[#0084c4]">
-                  {{ totalHadir }} dari {{ totalEmployees }} staf
-                </span>
-              </div>
+          <!-- Kehadiran Rate (Tanpa Tren) -->
+          <div class="flex flex-col justify-center py-1">
+            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Tingkat Kehadiran</span>
+            <div class="flex items-baseline gap-2 mt-1">
+              <span class="text-3xl font-black text-slate-800 tracking-tight">{{ attendancePercentage }}%</span>
             </div>
-
-            <!-- SVG Sparkline Wave Curve -->
-            <div class="mt-2">
-              <svg class="w-36 h-9" viewBox="0 0 140 36" fill="none">
-                <defs>
-                  <linearGradient id="sparkline-grad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#0084c4" stop-opacity="0.25" />
-                    <stop offset="100%" stop-color="#0084c4" stop-opacity="0" />
-                  </linearGradient>
-                </defs>
-                <path
-                  d="M 0 28 Q 20 26, 40 27 T 80 18 T 110 22 T 140 10 L 140 36 L 0 36 Z"
-                  fill="url(#sparkline-grad)"
-                />
-                <path
-                  d="M 0 28 Q 20 26, 40 27 T 80 18 T 110 22 T 140 10"
-                  fill="none"
-                  stroke="#0084c4"
-                  stroke-width="2.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </div>
+            <span class="text-[11px] font-bold text-[#0084c4] mt-1">
+              {{ totalHadir }} dari {{ totalEmployees }} staf hadir
+            </span>
           </div>
 
           <!-- Status List Breakdown -->

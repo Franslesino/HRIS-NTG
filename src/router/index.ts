@@ -39,22 +39,40 @@ const routes: RouteRecordRaw[] = [
   },
   // Modul Roster
   {
-    path: '/roster/tim',
+    path: '/roster/admin',
     name: 'RotasiJadwal',
     component: () => import('../pages/roster/RotasiJadwal.vue'),
     meta: { requiresAdmin: true },
   },
   {
-    path: '/roster/admin',
+    path: '/roster/admin/atur-shift',
     name: 'AdminRoster',
     component: () => import('../pages/roster/AdminRoster.vue'),
     meta: { requiresAdmin: true },
+  },
+  {
+    path: '/roster/tim',
+    redirect: '/roster/admin',
   },
   {
     path: '/roster/tambah',
     name: 'TambahJadwal',
     component: () => import('../pages/roster/TambahJadwal.vue'),
     meta: { requiresAdmin: true },
+  },
+  {
+    path: '/roster/tukar-shift',
+    name: 'AdminTukarShift',
+    component: () => import('../pages/roster/AdminTukarShift.vue'),
+    meta: { requiresAdmin: true },
+  },
+  {
+    path: '/roster/admin/tukar-shift',
+    redirect: '/roster/tukar-shift',
+  },
+  {
+    path: '/roster/user/tukar-shift',
+    redirect: '/roster/user',
   },
   {
     path: '/roster/user',
@@ -76,7 +94,24 @@ const routes: RouteRecordRaw[] = [
   // Modul Lembur
   {
     path: '/lembur',
-    name: 'Overtime',
+    redirect: () => {
+      try {
+        const u = JSON.parse(localStorage.getItem('bmis_user') || '{}');
+        return u.role === 'employee' || u.role === 'user' ? '/lembur/user' : '/lembur/admin';
+      } catch {
+        return '/lembur/admin';
+      }
+    },
+  },
+  {
+    path: '/lembur/admin',
+    name: 'AdminOvertime',
+    component: () => import('../pages/overtime/AdminOvertime.vue'),
+    meta: { requiresAdmin: true },
+  },
+  {
+    path: '/lembur/user',
+    name: 'UserOvertime',
     component: () => import('../pages/overtime/Overtime.vue'),
   },
 ];

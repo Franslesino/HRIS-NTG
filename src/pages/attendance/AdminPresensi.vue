@@ -62,26 +62,6 @@ const statusFilterOptions = [
   { value: 'ABSENT', text: 'Tidak Hadir / Alpa' },
 ];
 
-// Chart State
-const chartView = ref<'harian' | 'mingguan'>('mingguan');
-const chartDataPoints = computed(() => {
-  if (chartView.value === 'harian') {
-    return [
-      { label: '07:00', value: 88 },
-      { label: '08:00', value: 94 },
-      { label: '09:00', value: 96 },
-      { label: '13:00', value: 95 },
-      { label: '17:00', value: 92 },
-    ];
-  }
-  return [
-    { label: 'Sen', value: 90 },
-    { label: 'Sel', value: 95 },
-    { label: 'Rab', value: 92 },
-    { label: 'Kam', value: 96 },
-    { label: 'Jum', value: 88 },
-  ];
-});
 
 // Search & Pagination State
 const searchQuery = ref('');
@@ -449,96 +429,35 @@ const handleExport = () => {
       </div>
     </div>
 
-    <!-- Stats & Chart Section (Grid 4:8) -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-      <!-- Left Column: 2 Stat Cards (4 Cols) -->
-      <div class="lg:col-span-4 flex flex-col justify-between gap-4">
-        <div class="bg-white rounded-xl shadow-sm p-5 flex-1 flex flex-col justify-center">
-          <span class="text-slate-400 text-[11px] font-bold uppercase tracking-[0.8px] block mb-2">
-            RATA-RATA KEHADIRAN
+    <!-- Stats Section (2 Cards) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div class="bg-white rounded-xl shadow-sm p-5 flex flex-col justify-center">
+        <span class="text-slate-400 text-[11px] font-bold uppercase tracking-[0.8px] block mb-2">
+          RATA-RATA KEHADIRAN
+        </span>
+        <div class="flex items-baseline gap-3">
+          <h1 class="text-[2.2rem] font-bold text-slate-800 m-0 leading-none">
+            {{ attendancePercentText }}
+          </h1>
+          <span class="inline-flex items-center text-emerald-600 font-bold text-xs whitespace-nowrap">
+            <Users :size="13" class="mr-1" />
+            Total: {{ summary.total_karyawan }}
           </span>
-          <div class="flex items-baseline gap-3">
-            <h1 class="text-[2.2rem] font-bold text-slate-800 m-0 leading-none">
-              {{ attendancePercentText }}
-            </h1>
-            <span class="inline-flex items-center text-emerald-600 font-bold text-xs whitespace-nowrap">
-              <Users :size="13" class="mr-1" />
-              Total: {{ summary.total_karyawan }}
-            </span>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-sm p-5 flex-1 flex flex-col justify-center">
-          <span class="text-slate-400 text-[11px] font-bold uppercase tracking-[0.8px] block mb-2">
-            TOTAL KETERLAMBATAN
-          </span>
-          <div class="flex items-baseline gap-3">
-            <h1 class="text-[2.2rem] font-bold text-slate-800 m-0 leading-none">
-              {{ summary.terlambat }}
-            </h1>
-            <span class="inline-flex items-center text-red-500 font-bold text-xs whitespace-nowrap">
-              <Clock :size="13" class="mr-1" />
-              Karyawan Terlambat
-            </span>
-          </div>
         </div>
       </div>
 
-      <!-- Right Column: Chart Tren Kehadiran (8 Cols) -->
-      <div class="lg:col-span-8">
-        <div class="bg-white rounded-xl shadow-sm p-5 h-full flex flex-col justify-between">
-          <div class="flex items-center justify-between mb-3">
-            <h5 class="font-bold text-slate-800 text-base m-0">Tren Kehadiran</h5>
-            <div class="inline-flex rounded-md overflow-hidden border border-slate-300">
-              <button
-                type="button"
-                @click="chartView = 'harian'"
-                :class="[
-                  'px-3 py-1 text-xs font-semibold transition-colors cursor-pointer',
-                  chartView === 'harian'
-                    ? 'bg-[#547fff] text-white'
-                    : 'bg-white text-slate-600 hover:bg-slate-50'
-                ]"
-              >
-                Harian
-              </button>
-              <button
-                type="button"
-                @click="chartView = 'mingguan'"
-                :class="[
-                  'px-3 py-1 text-xs font-semibold transition-colors cursor-pointer border-l border-slate-300',
-                  chartView === 'mingguan'
-                    ? 'bg-[#547fff] text-white'
-                    : 'bg-white text-slate-600 hover:bg-slate-50'
-                ]"
-              >
-                Mingguan
-              </button>
-            </div>
-          </div>
-
-          <!-- Bar Visualisation matching AdminPresensi.vue -->
-          <div class="h-[180px] py-3">
-            <div class="flex items-end justify-between h-full px-4 border-b-2 border-[#e2e8f0]">
-              <div
-                v-for="(item, i) in chartDataPoints"
-                :key="i"
-                class="flex-1 h-full flex flex-col justify-end items-center text-center"
-              >
-                <div class="h-[140px] w-[28px] bg-[#f1f5f9] rounded-t-[6px] flex items-end overflow-hidden">
-                  <div
-                    class="w-full rounded-t-[6px] transition-all duration-500"
-                    :style="{
-                      height: item.value + '%',
-                      background: 'linear-gradient(180deg, #547fff 0%, #279faa 100%)',
-                    }"
-                    :title="item.label + ': ' + item.value + '%'"
-                  ></div>
-                </div>
-                <span class="text-slate-400 text-[11px] mt-2 block">{{ item.label }}</span>
-              </div>
-            </div>
-          </div>
+      <div class="bg-white rounded-xl shadow-sm p-5 flex flex-col justify-center">
+        <span class="text-slate-400 text-[11px] font-bold uppercase tracking-[0.8px] block mb-2">
+          TOTAL KETERLAMBATAN
+        </span>
+        <div class="flex items-baseline gap-3">
+          <h1 class="text-[2.2rem] font-bold text-slate-800 m-0 leading-none">
+            {{ summary.terlambat }}
+          </h1>
+          <span class="inline-flex items-center text-red-500 font-bold text-xs whitespace-nowrap">
+            <Clock :size="13" class="mr-1" />
+            Karyawan Terlambat
+          </span>
         </div>
       </div>
     </div>

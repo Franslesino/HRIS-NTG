@@ -5,23 +5,22 @@ import {
   Clock,
   Building2,
   Calendar,
-  ArrowLeftRight,
   ChevronLeft,
   ChevronRight,
   MapPin,
   X,
   CheckCircle2,
-  ShieldCheck,
-  Send,
   Map,
   Info,
-  Check
+  Check,
+  ArrowLeftRight,
+  ShieldCheck
 } from 'lucide-vue-next';
 import { useAuth } from '../../composables/useAuth';
 import { useRosterStore } from '../../composables/useRosterStore';
+import ModalAjukanTukarShift from '../../components/roster/ModalAjukanTukarShift.vue';
 
 const { currentUser } = useAuth();
-const { addSwapRequest } = useRosterStore();
 
 // State Bulan Aktif (Default bulan saat ini)
 const now = new Date();
@@ -76,10 +75,8 @@ interface CalendarCell {
   dayOfWeekIndex: number; // 0 = SEN, 6 = MIN
   shiftCode: 'Pagi' | 'Siang' | 'Malam' | 'OFF';
   shiftTime: string;
-  badge?: 'Menunggu Rekan' | 'Menunggu Koordinator';
+  swapStatus?: 'rekan' | 'koordinator';
 }
-
-const submittedSwapDays = ref<number[]>([15]);
 
 const calendarDays = computed<CalendarCell[]>(() => {
   const y = currentYear.value;
@@ -141,15 +138,15 @@ const calendarDays = computed<CalendarCell[]>(() => {
     }
 
     // Hari ini (Today check)
-    // Default fallback hari ke-8 jika di luar bulan aktual untuk demo visual
+    // Default fallback hari ke-8 jika di luar bulan aktual untuk demo visual persis mockup
     const isToday = isThisActualMonth ? (d === actualDateNum) : (d === 8);
 
-    // Badges khusus seperti di desain BMIS
-    let badge: 'Menunggu Rekan' | 'Menunggu Koordinator' | undefined = undefined;
-    if (submittedSwapDays.value.includes(d)) {
-      badge = 'Menunggu Rekan';
+    // Swap status demo (persis screenshot)
+    let swapStatus: 'rekan' | 'koordinator' | undefined = undefined;
+    if (d === 15) {
+      swapStatus = 'rekan';
     } else if (d === 23) {
-      badge = 'Menunggu Koordinator';
+      swapStatus = 'koordinator';
     }
 
     cells.push({
@@ -160,7 +157,7 @@ const calendarDays = computed<CalendarCell[]>(() => {
       dayOfWeekIndex: dow,
       shiftCode,
       shiftTime,
-      badge,
+      swapStatus,
     });
   }
 
@@ -201,115 +198,13 @@ const totalWorkHours = computed(() => {
   return workShiftsCount.value * 8;
 });
 
-// Modal Ajukan Pertukaran Jadwal Shift (Shift Swap)
-const isSwapModalOpen = ref(false);
-
-interface MyShiftOption {
-  dayNumber: number;
-  formattedDate: string;
-  shiftCode: 'Pagi' | 'Siang' | 'Malam';
-  shiftTime: string;
-  fullLabel: string;
-}
-
-interface ColleagueOption {
-  id: string;
-  name: string;
-  empId: string;
-  role: string;
-  fullLabel: string;
-}
-
-const qualifiedColleagues: ColleagueOption[] = [
-  {
-    id: 'EMP-042',
-    name: 'Budi Raharjo',
-    empId: 'EMP-042',
-    role: 'Staff Operasional',
-    fullLabel: 'Budi Raharjo (EMP-042) — Staff Operasional'
-  },
-  {
-    id: 'EMP-055',
-    name: 'Siti Nurhaliza',
-    empId: 'EMP-055',
-    role: 'Staff Operasional',
-    fullLabel: 'Siti Nurhaliza (EMP-055) — Staff Operasional'
-  },
-  {
-    id: 'EMP-061',
-    name: 'Rian Hidayat',
-    empId: 'EMP-061',
-    role: 'Staff Operasional',
-    fullLabel: 'Rian Hidayat (EMP-061) — Staff Operasional'
-  },
-  {
-    id: 'EMP-073',
-    name: 'Dimas Anggara',
-    empId: 'EMP-073',
-    role: 'Staff Operasional',
-    fullLabel: 'Dimas Anggara (EMP-073) — Staff Operasional'
-  }
-];
-
-// List shift aktif pemohon di bulan yang dipilih (bukan hari OFF)
-const myActiveShifts = computed<MyShiftOption[]>(() => {
-  const dayNamesIndo = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-  const y = currentYear.value;
-  const m = currentMonthIndex.value;
-  const mShort = monthShortNamesIndo[m];
-
-  return calendarDays.value
-    .filter(c => c.isCurrentMonth && c.shiftCode !== 'OFF')
-    .map(c => {
-      const dateObj = new Date(y, m, c.dayNumber);
-      const dayName = dayNamesIndo[dateObj.getDay()];
-      const formattedDate = `${dayName}, ${c.dayNumber} ${mShort} ${y}`;
-      return {
-        dayNumber: c.dayNumber,
-        formattedDate,
-        shiftCode: c.shiftCode as 'Pagi' | 'Siang' | 'Malam',
-        shiftTime: c.shiftTime,
-        fullLabel: `${formattedDate} — Shift ${c.shiftCode} (${c.shiftTime} WIB)`
-      };
-    });
-});
-
-const selectedMyShiftDay = ref<number>(9);
-const selectedColleagueId = ref<string>('EMP-042');
-const swapReason = ref<string>(
-  'Keperluan keluarga mendesak di luar kota pada shift Pagi. Mohon bantuannya rekan Budi, terima kasih banyak sebelumnya.'
-);
-
-const selectedMyShiftDetail = computed(() => {
-  const found = myActiveShifts.value.find(s => s.dayNumber === selectedMyShiftDay.value);
-  if (found) return found;
-  return (
-    myActiveShifts.value[0] || {
-      dayNumber: 9,
-      formattedDate: `Kamis, 9 Okt ${currentYear.value}`,
-      shiftCode: 'Pagi' as const,
-      shiftTime: '08:00 - 16:00',
-      fullLabel: `Kamis, 9 Okt ${currentYear.value} — Shift Pagi (08:00 - 16:00 WIB)`
-    }
-  );
-});
-
-const selectedColleagueDetail = computed(() => {
-  return (
-    qualifiedColleagues.find(c => c.id === selectedColleagueId.value) ||
-    qualifiedColleagues[0]
-  );
-});
-
-const openSwapModal = () => {
-  if (myActiveShifts.value.length > 0 && !myActiveShifts.value.some(s => s.dayNumber === selectedMyShiftDay.value)) {
-    selectedMyShiftDay.value = myActiveShifts.value[0].dayNumber;
-  }
-  isSwapModalOpen.value = true;
-};
-
-// Modal Peta Lokasi Penugasan
+// Modal State
 const isMapModalOpen = ref(false);
+const isShiftSwapModalOpen = ref(false);
+
+const handleShiftSwapSubmitted = () => {
+  triggerToast('Pengajuan tukar shift berhasil dikirim ke rekan kerja!');
+};
 
 // Toast Notification
 const toastMessage = ref('');
@@ -320,35 +215,6 @@ const triggerToast = (msg: string) => {
   setTimeout(() => {
     isToastVisible.value = false;
   }, 4000);
-};
-
-const submitSwapRequest = () => {
-  if (!swapReason.value.trim()) {
-    triggerToast('Harap sertakan alasan penukaran shift!');
-    return;
-  }
-  if (!submittedSwapDays.value.includes(selectedMyShiftDay.value)) {
-    submittedSwapDays.value.push(selectedMyShiftDay.value);
-  }
-
-  addSwapRequest({
-    id: `swap-${Date.now()}`,
-    requesterId: currentUser.value?.id || 'usr-employee-asep',
-    requesterName: currentUser.value?.nama || 'Asep Milo',
-    colleagueId: selectedColleagueDetail.value.id,
-    colleagueName: selectedColleagueDetail.value.name,
-    swapDate: selectedMyShiftDetail.value.formattedDate,
-    myShift: `Shift ${selectedMyShiftDetail.value.shiftCode}`,
-    colleagueShift: selectedMyShiftDetail.value.shiftCode === 'Pagi' ? 'Shift Siang' : 'Shift Pagi',
-    status: 'Menunggu Approval',
-    colleagueApproved: true,
-    restValidationNotes: 'Telah divalidasi tidak melanggar batas jeda istirahat 11 jam.',
-    reason: swapReason.value,
-    createdAt: 'Hari ini'
-  });
-
-  isSwapModalOpen.value = false;
-  triggerToast(`Pengajuan tukar shift berhasil dikirim ke rekan ${selectedColleagueDetail.value.name} & koordinator.`);
 };
 </script>
 
@@ -399,76 +265,14 @@ const submitSwapRequest = () => {
           </button>
         </div>
 
-        <!-- Tombol Ajukan Tukar Shift -->
+        <!-- Tombol Biru Ajukan Tukar Shift (Persis Screenshot) -->
         <button
           type="button"
-          @click="openSwapModal"
-          class="h-10 px-4 rounded-xl bg-[#0084c4] hover:bg-[#0073ab] text-white text-xs font-bold flex items-center gap-2 shadow-xs transition-all active:scale-98 cursor-pointer"
+          @click="isShiftSwapModalOpen = true"
+          class="h-9 px-4 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] text-white text-xs font-bold flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
         >
           <ArrowLeftRight :size="15" />
           <span>Ajukan Tukar Shift</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- ── BARIS INFORMASI PENUGASAN & LOKASI (HORIZONTAL BANNER DI ATAS KALENDER) ── -->
-    <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-      <!-- 1. Gedung & Ruang Operasional -->
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-[#e0f2fe] text-[#0084c4] flex items-center justify-center flex-shrink-0">
-          <Building2 :size="20" />
-        </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <h3 class="font-bold text-xs text-slate-800">Gedung Utama BMIS</h3>
-            <span class="px-2 py-0.5 rounded-full bg-[#e0f2fe] text-[#0284c7] border border-[#bae6fd] text-[9.5px] font-bold">
-              Aktif
-            </span>
-          </div>
-          <p class="text-[11px] text-slate-500 m-0">Lantai 3, Ruang Operasional 302</p>
-        </div>
-      </div>
-
-      <!-- Divider -->
-      <div class="h-8 w-px bg-slate-200 hidden lg:block"></div>
-
-      <!-- 2. Detail Rincian: Periode, Koordinator, Kontak & Kapasitas -->
-      <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs">
-        <div>
-          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Periode Penugasan</span>
-          <span class="font-bold text-slate-700">1 {{ monthShortNamesIndo[currentMonthIndex] }} - 31 {{ monthShortNamesIndo[currentMonthIndex] }} {{ currentYear }}</span>
-        </div>
-
-        <div>
-          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Koordinator Shift</span>
-          <div class="flex items-center gap-1.5 font-bold text-slate-700">
-            <span class="w-4 h-4 rounded-full bg-slate-200 text-slate-700 text-[8.5px] font-bold flex items-center justify-center">
-              AS
-            </span>
-            <span>Bpk. Ahmad S.</span>
-          </div>
-        </div>
-
-        <div>
-          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Kontak Koordinator</span>
-          <span class="font-semibold text-slate-700">EXT 3021 &bull; <span class="text-slate-500">+62 812-3456-7890</span></span>
-        </div>
-
-        <div>
-          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Kapasitas Posisi</span>
-          <span class="font-bold text-slate-700">6 Personel / Shift</span>
-        </div>
-      </div>
-
-      <!-- 3. Tombol Aksi: Lihat Peta Lokasi -->
-      <div class="flex-shrink-0">
-        <button
-          type="button"
-          @click="isMapModalOpen = true"
-          class="h-9 px-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
-        >
-          <Map :size="14" class="text-slate-600" />
-          <span>Lihat Peta Lokasi</span>
         </button>
       </div>
     </div>
@@ -578,23 +382,20 @@ const submitSwapRequest = () => {
                 <div class="text-[9.5px] text-slate-400 mt-0.5 leading-none">Libur</div>
               </div>
 
-              <!-- Badges Status Khusus Penukaran Shift -->
+              <!-- Swap Status Badges (Menunggu Rekan / Menunggu Koordinator - Persis Mockup) -->
               <div
-                v-if="cell.badge === 'Menunggu Rekan'"
-                class="inline-flex items-center gap-1 w-full justify-center px-1 py-0.5 rounded bg-[#fef3c7] text-[#b45309] border border-[#fde68a] text-[8.5px] font-bold leading-tight"
-                title="Permintaan tukar shift menunggu persetujuan rekan kerja"
+                v-if="cell.swapStatus === 'rekan'"
+                class="bg-[#fffbeb] border border-[#fde68a] text-[#b45309] rounded-md px-1 py-0.5 text-center flex items-center justify-center gap-1 shadow-2xs mt-1"
               >
-                <Clock :size="9" class="flex-shrink-0" />
-                <span class="truncate">Menunggu Rekan</span>
+                <Clock :size="10" class="text-[#d97706] flex-shrink-0" />
+                <span class="text-[8.5px] font-bold leading-tight">Menunggu Rekan</span>
               </div>
-
               <div
-                v-else-if="cell.badge === 'Menunggu Koordinator'"
-                class="inline-flex items-center gap-1 w-full justify-center px-1 py-0.5 rounded bg-[#fef3c7] text-[#b45309] border border-[#fde68a] text-[8.5px] font-bold leading-tight"
-                title="Permintaan tukar shift menunggu verifikasi koordinator shift"
+                v-else-if="cell.swapStatus === 'koordinator'"
+                class="bg-[#fffbeb] border border-[#fde68a] text-[#b45309] rounded-md px-1 py-0.5 text-center flex items-center justify-center gap-1 shadow-2xs mt-1"
               >
-                <ShieldCheck :size="9" class="flex-shrink-0" />
-                <span class="truncate">Menunggu Koordinator</span>
+                <ShieldCheck :size="10" class="text-[#d97706] flex-shrink-0" />
+                <span class="text-[8.5px] font-bold leading-tight">Menunggu Koordinator</span>
               </div>
             </div>
 
@@ -615,347 +416,100 @@ const submitSwapRequest = () => {
         </div>
       </div>
 
-      <!-- ── KOLOM KANAN: WIDGET JADWAL SHIFT & LOKASI (4 COLS) ── -->
+      <!-- ── KOLOM KANAN: WIDGET JADWAL SHIFT & LOKASI (4 COLS - PERSIS SCREENSHOT) ── -->
       <div class="lg:col-span-4 space-y-5">
         <!-- 1. Card Jadwal Shift & Kategori -->
         <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
           <!-- Card Header -->
           <div class="flex items-center justify-between pb-3 border-b border-slate-100">
             <div class="flex items-center gap-2">
-              <Clock :size="16" class="text-[#0084c4]" />
-              <h2 class="text-sm font-bold text-slate-800">Jadwal Shift</h2>
+              <Clock :size="16" class="text-[#0284c7]" />
+              <h2 class="text-xs font-bold text-slate-800">Jadwal Shift</h2>
             </div>
-            <span class="text-xs text-slate-400 font-medium">4 Kategori</span>
+            <span class="text-[11px] text-slate-400 font-medium">4 Kategori</span>
           </div>
 
-          <!-- 4 Category Items Vertical -->
-          <div class="space-y-2.5 text-xs">
-            <!-- 1. Shift Pagi -->
-            <div class="bg-[#f0fdf4] border border-[#bbf7d0] rounded-xl p-3 flex items-center gap-3">
-              <div class="w-3 h-3 rounded-full bg-[#16a34a] flex-shrink-0"></div>
-              <div>
-                <div class="font-bold text-slate-800 text-xs">Shift Pagi</div>
-                <div class="text-[11px] text-slate-500 mt-0.5">08:00 - 16:00 (8 Jam)</div>
-              </div>
+          <!-- Highlight Shift Malam Active (Persis Screenshot) -->
+          <div class="bg-[#faf5ff] border border-[#e9d5ff] rounded-xl p-3 flex items-center gap-3">
+            <div class="w-3 h-3 rounded-full bg-[#9333ea] flex-shrink-0"></div>
+            <div>
+              <div class="font-bold text-slate-800 text-xs">Shift Malam</div>
+              <div class="text-[11px] text-slate-500 mt-0.5">00:00 - 08:00 (8 Jam)</div>
             </div>
+          </div>
+        </div>
 
-            <!-- 2. Shift Siang -->
-            <div class="bg-[#eff6ff] border border-[#bfdbfe] rounded-xl p-3 flex items-center gap-3">
-              <div class="w-3 h-3 rounded-full bg-[#2563eb] flex-shrink-0"></div>
-              <div>
-                <div class="font-bold text-slate-800 text-xs">Shift Siang</div>
-                <div class="text-[11px] text-slate-500 mt-0.5">16:00 - 00:00 (8 Jam)</div>
-              </div>
+        <!-- 2. Card Lokasi Penugasan (Persis Screenshot) -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div class="flex items-center gap-2">
+              <MapPin :size="16" class="text-[#0284c7]" />
+              <h2 class="text-xs font-bold text-slate-800">Lokasi Penugasan</h2>
             </div>
+            <span class="px-2 py-0.5 rounded-full bg-[#e0f2fe] text-[#0284c7] border border-[#bae6fd] text-[9.5px] font-bold">
+              Aktif
+            </span>
+          </div>
 
-            <!-- 3. Shift Malam -->
-            <div class="bg-[#faf5ff] border border-[#e9d5ff] rounded-xl p-3 flex items-center gap-3">
-              <div class="w-3 h-3 rounded-full bg-[#9333ea] flex-shrink-0"></div>
-              <div>
-                <div class="font-bold text-slate-800 text-xs">Shift Malam</div>
-                <div class="text-[11px] text-slate-500 mt-0.5">00:00 - 08:00 (8 Jam)</div>
-              </div>
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-xl bg-[#e0f2fe] text-[#0284c7] flex items-center justify-center flex-shrink-0">
+              <Building2 :size="20" />
             </div>
-
-            <!-- 4. Hari Libur (OFF) -->
-            <div class="bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-3 flex items-center gap-3">
-              <div class="w-3 h-3 rounded-full bg-slate-400 flex-shrink-0"></div>
-              <div>
-                <div class="font-bold text-slate-800 text-xs">Hari Libur (OFF)</div>
-                <div class="text-[11px] text-slate-500 mt-0.5">Istirahat Mingguan / Siklus</div>
-              </div>
+            <div>
+              <h3 class="font-bold text-xs text-slate-800">Gedung Utama BMIS</h3>
+              <p class="text-[11px] text-slate-500 m-0">Lantai 3, Ruang Operasional 302</p>
             </div>
           </div>
 
-          <!-- Bottom 3 Stats Row -->
-          <div class="grid grid-cols-3 gap-2 pt-3 border-t border-slate-100 text-center">
-            <div>
-              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">TOTAL JAM</span>
-              <div class="text-base font-black text-slate-800 mt-0.5">{{ totalWorkHours }} Jam</div>
+          <div class="space-y-3 pt-3 border-t border-slate-100 text-xs">
+            <div class="flex items-center justify-between">
+              <span class="text-slate-400 text-[11px]">Periode Penugasan</span>
+              <span class="font-bold text-slate-800 text-xs">1 Okt - 31 Okt {{ currentYear }}</span>
             </div>
-            <div>
-              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">MASUK KERJA</span>
-              <div class="text-base font-black text-[#0084c4] mt-0.5">{{ workShiftsCount }} Hari</div>
+
+            <div class="flex items-center justify-between">
+              <span class="text-slate-400 text-[11px]">Koordinator Shift</span>
+              <div class="flex items-center gap-1.5 font-bold text-slate-800 text-xs">
+                <span class="w-4 h-4 rounded-full bg-slate-200 text-slate-700 text-[8.5px] font-bold flex items-center justify-center">
+                  AS
+                </span>
+                <span>Bpk. Ahmad S.</span>
+              </div>
             </div>
-            <div>
-              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">LIBUR</span>
-              <div class="text-base font-black text-slate-700 mt-0.5">{{ offDaysCount }} Hari</div>
+
+            <div class="flex items-center justify-between">
+              <span class="text-slate-400 text-[11px]">Kontak Koordinator</span>
+              <div class="text-right text-xs">
+                <span class="font-bold text-slate-700">EXT 3021</span>
+                <div class="text-[10px] text-slate-500">+62 812-3456-7890</div>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <span class="text-slate-400 text-[11px]">Kapasitas Posisi</span>
+              <span class="font-bold text-slate-800 text-xs">6 Personel / Shift</span>
             </div>
           </div>
+
+          <button
+            type="button"
+            @click="isMapModalOpen = true"
+            class="w-full h-9 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-2xs mt-2"
+          >
+            <Map :size="14" class="text-slate-600" />
+            <span>Lihat Peta Lokasi</span>
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- ── MODAL 1: AJUKAN TUKAR SHIFT (SHIFT SWAP) SESUAI DESAIN BMIS ── -->
-    <Teleport to="body">
-      <div
-        v-if="isSwapModalOpen"
-        class="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200"
-      >
-        <div class="bg-white rounded-3xl max-w-4xl w-full p-6 sm:p-7 shadow-2xl border border-slate-200/90 space-y-4 max-h-[92vh] overflow-y-auto animate-in zoom-in-95 duration-200">
-          <!-- Modal Header -->
-          <div class="flex items-start justify-between gap-3 pb-3 border-b border-slate-100">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-2xl bg-[#0084c4]/10 text-[#0084c4] flex items-center justify-center shrink-0">
-                <ArrowLeftRight :size="20" />
-              </div>
-              <div>
-                <h3 class="text-base font-bold text-slate-800">
-                  Ajukan Pertukaran Jadwal Shift (Shift Swap)
-                </h3>
-                <p class="text-xs text-slate-500 mt-0.5">
-                  Pilih shift Anda yang ingin ditukar, lalu tentukan rekan kerja pengganti sesuai kriteria kualifikasi.
-                </p>
-              </div>
-            </div>
-            <button
-              type="button"
-              @click="isSwapModalOpen = false"
-              class="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 flex items-center justify-center transition-colors cursor-pointer"
-            >
-              <X :size="18" />
-            </button>
-          </div>
+    <!-- ── POPUP FORM: AJUKAN PERTUKARAN JADWAL SHIFT (SHIFT SWAP) ── -->
+    <ModalAjukanTukarShift
+      v-model="isShiftSwapModalOpen"
+      @submitted="handleShiftSwapSubmitted"
+    />
 
-          <!-- Stepper Indicator -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <!-- Step 1 Card -->
-            <div class="bg-[#f0f9ff] border border-[#bae6fd] rounded-xl p-3 flex items-center justify-between">
-              <div class="flex items-center gap-2.5">
-                <div class="w-6 h-6 rounded-full bg-[#0084c4] text-white text-xs font-black flex items-center justify-center shrink-0">
-                  1
-                </div>
-                <div>
-                  <div class="text-xs font-bold text-slate-800">Langkah 1: Shift Anda yang Ditukar</div>
-                  <div class="text-[11px] text-[#0084c4] font-semibold">Jadwal Pemohon Dipilih</div>
-                </div>
-              </div>
-              <div class="w-5 h-5 rounded-full border border-[#0084c4] text-[#0084c4] flex items-center justify-center">
-                <Check :size="12" />
-              </div>
-            </div>
-
-            <!-- Step 2 Card -->
-            <div class="bg-[#f0f9ff] border border-[#bae6fd] rounded-xl p-3 flex items-center justify-between">
-              <div class="flex items-center gap-2.5">
-                <div class="w-6 h-6 rounded-full bg-[#0084c4] text-white text-xs font-black flex items-center justify-center shrink-0">
-                  2
-                </div>
-                <div>
-                  <div class="text-xs font-bold text-slate-800">Langkah 2: Rekan &amp; Shift Tujuan</div>
-                  <div class="text-[11px] text-[#0084c4] font-semibold">Siap Dipilih</div>
-                </div>
-              </div>
-              <div class="w-5 h-5 rounded-full border border-[#0084c4] text-[#0084c4] flex items-center justify-center">
-                <Check :size="12" />
-              </div>
-            </div>
-          </div>
-
-          <form @submit.prevent="submitSwapRequest" class="space-y-4">
-            <!-- Two Columns Form -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <!-- Left Column: Langkah 1 -->
-              <div class="bg-white border border-slate-200/90 rounded-2xl p-4 space-y-3.5 shadow-2xs flex flex-col justify-between">
-                <div class="space-y-3">
-                  <div class="flex items-center justify-between gap-2">
-                    <span class="text-[11px] font-bold text-slate-700 tracking-wide uppercase">
-                      LANGKAH 1 &bull; PILIH JADWAL ANDA YANG INGIN DILEPAS
-                    </span>
-                    <span class="px-2 py-0.5 rounded-md bg-[#e0f2fe] text-[#0284c7] text-[10px] font-bold shrink-0">
-                      Jadwal Aktif Terdaftar
-                    </span>
-                  </div>
-
-                  <div>
-                    <label class="block font-bold text-xs text-slate-700 mb-1.5">
-                      Pilih Hari &amp; Shift Anda
-                    </label>
-                    <select
-                      v-model="selectedMyShiftDay"
-                      class="w-full h-10 px-3 rounded-xl border border-slate-200 text-xs text-slate-800 bg-white focus:outline-none focus:border-[#0084c4] focus:ring-1 focus:ring-[#0084c4]/20 transition-all font-medium"
-                    >
-                      <option
-                        v-for="s in myActiveShifts"
-                        :key="s.dayNumber"
-                        :value="s.dayNumber"
-                      >
-                        {{ s.fullLabel }}
-                      </option>
-                    </select>
-                  </div>
-
-                  <!-- Profile & Selected Shift Summary Box -->
-                  <div class="bg-slate-50/90 border border-slate-200/80 rounded-xl p-3.5 space-y-3">
-                    <div class="flex items-center gap-3">
-                      <div class="w-9 h-9 rounded-full bg-[#0084c4] text-white font-bold text-xs flex items-center justify-center shrink-0">
-                        {{ currentUser?.avatarInitials || 'AM' }}
-                      </div>
-                      <div>
-                        <div class="font-bold text-xs text-slate-800">
-                          {{ currentUser?.nama || 'Asep Milo' }} ({{ currentUser?.nip || 'EMP-018' }})
-                        </div>
-                        <div class="text-[11px] text-slate-500 font-medium">
-                          Staff Operasional
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200/70">
-                      <div>
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">SHIFT</span>
-                        <span class="text-xs font-bold text-[#0084c4]">
-                          {{ selectedMyShiftDetail.shiftCode }} ({{ selectedMyShiftDetail.shiftTime }})
-                        </span>
-                      </div>
-                      <div>
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">STATUS HARI</span>
-                        <span class="text-xs font-bold text-emerald-600">
-                          Hari Kerja Aktif
-                        </span>
-                      </div>
-                    </div>
-
-                    <div class="pt-2 border-t border-slate-200/70">
-                      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">LOKASI PENUGASAN</span>
-                      <span class="text-xs font-semibold text-slate-700">
-                        Gedung Utama BMIS, Ruang Operasional 302
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Helper text -->
-                <div class="flex items-center gap-1.5 text-[11px] text-slate-500 pt-1">
-                  <Info :size="13" class="text-slate-400 shrink-0" />
-                  <span>Hanya hari aktif (bukan hari OFF) yang dapat ditukar.</span>
-                </div>
-              </div>
-
-              <!-- Right Column: Langkah 2 -->
-              <div class="bg-white border border-slate-200/90 rounded-2xl p-4 space-y-3.5 shadow-2xs flex flex-col justify-between">
-                <div class="space-y-3">
-                  <div class="flex items-center justify-between gap-2">
-                    <span class="text-[11px] font-bold text-slate-700 tracking-wide uppercase">
-                      LANGKAH 2 &bull; PILIH REKAN KERJA &amp; SHIFT TUJUAN
-                    </span>
-                    <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[10px] font-bold shrink-0">
-                      Filter Kualifikasi Sama
-                    </span>
-                  </div>
-
-                  <div>
-                    <label class="block font-bold text-xs text-slate-700 mb-1.5">
-                      Pilih Rekan Kerja Pengganti
-                    </label>
-                    <select
-                      v-model="selectedColleagueId"
-                      class="w-full h-10 px-3 rounded-xl border border-slate-200 text-xs text-slate-800 bg-white focus:outline-none focus:border-[#0084c4] focus:ring-1 focus:ring-[#0084c4]/20 transition-all font-medium"
-                    >
-                      <option
-                        v-for="c in qualifiedColleagues"
-                        :key="c.id"
-                        :value="c.id"
-                      >
-                        {{ c.fullLabel }}
-                      </option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <div class="flex items-center justify-between mb-1.5">
-                      <label class="font-bold text-xs text-slate-700">
-                        Alasan Pertukaran Shift
-                      </label>
-                    </div>
-                    <textarea
-                      v-model="swapReason"
-                      rows="4"
-                      maxlength="250"
-                      placeholder="Tuliskan alasan permohonan pertukaran shift..."
-                      class="w-full p-2.5 rounded-xl border border-slate-200 text-xs text-slate-700 leading-relaxed focus:outline-none focus:border-[#0084c4] focus:ring-1 focus:ring-[#0084c4]/20 transition-all placeholder:text-slate-400"
-                    ></textarea>
-                    <div class="flex justify-end text-[10px] text-slate-400 mt-1 font-medium">
-                      {{ swapReason.length }} / 250 karakter
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Bottom Row: Konfirmasi Persetujuan -->
-                <div class="flex items-center justify-between pt-2.5 border-t border-slate-100">
-                  <span class="text-xs text-slate-500 font-medium">Konfirmasi Persetujuan</span>
-                  <span class="text-xs font-bold text-[#0084c4]">Memerlukan Konfirmasi Rekan</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Real-time SOP Compliance Check Banner -->
-            <div class="bg-[#f0f9ff]/70 border border-[#bae6fd] rounded-xl p-3.5 space-y-2.5">
-              <div class="flex items-center justify-between flex-wrap gap-2">
-                <div class="flex items-center gap-1.5">
-                  <ShieldCheck :size="16" class="text-[#0084c4]" />
-                  <span class="text-xs font-black text-slate-800 tracking-wider uppercase">
-                    REAL-TIME SOP COMPLIANCE CHECK
-                  </span>
-                </div>
-                <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-bold">
-                  4 / 4 Kriteria Terpenuhi
-                </span>
-              </div>
-
-              <!-- 4 Criteria Items -->
-              <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-                <div class="bg-white border border-emerald-100 rounded-lg px-2.5 py-1.5 flex items-center gap-1.5 shadow-2xs">
-                  <CheckCircle2 :size="14" class="text-emerald-600 shrink-0" />
-                  <span class="text-[11px] font-semibold text-slate-700">Unit Sama (Operasional)</span>
-                </div>
-                <div class="bg-white border border-emerald-100 rounded-lg px-2.5 py-1.5 flex items-center gap-1.5 shadow-2xs">
-                  <CheckCircle2 :size="14" class="text-emerald-600 shrink-0" />
-                  <span class="text-[11px] font-semibold text-slate-700">Kualifikasi Setara</span>
-                </div>
-                <div class="bg-white border border-emerald-100 rounded-lg px-2.5 py-1.5 flex items-center gap-1.5 shadow-2xs">
-                  <CheckCircle2 :size="14" class="text-emerald-600 shrink-0" />
-                  <span class="text-[11px] font-semibold text-slate-700">Tanggal Valid (&gt;24 jam)</span>
-                </div>
-                <div class="bg-white border border-emerald-100 rounded-lg px-2.5 py-1.5 flex items-center gap-1.5 shadow-2xs">
-                  <CheckCircle2 :size="14" class="text-emerald-600 shrink-0" />
-                  <span class="text-[11px] font-semibold text-slate-700">Rest Interval &gt;16 Jam</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Modal Footer -->
-            <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-slate-100">
-              <div class="flex items-center gap-2 text-xs text-slate-500">
-                <Send :size="13" class="text-slate-400 shrink-0" />
-                <span>
-                  Rekan <strong class="text-slate-700 font-bold">{{ selectedColleagueDetail.name }}</strong> akan menerima notifikasi otomatis sebelum diteruskan ke koordinator.
-                </span>
-              </div>
-
-              <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
-                <button
-                  type="button"
-                  @click="isSwapModalOpen = false"
-                  class="h-9 px-4 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  class="h-9 px-5 rounded-xl bg-[#0084c4] hover:bg-[#0073ab] text-white text-xs font-bold flex items-center gap-2 shadow-xs transition-all active:scale-98 cursor-pointer"
-                >
-                  <ArrowLeftRight :size="14" />
-                  <span>Kirim Pengajuan Tukar</span>
-                </button>
-              </div>
-            </div>
-          </form>
-        </div>
-      </div>
-    </Teleport>
-
-    <!-- ── MODAL 2: PETA LOKASI PENUGASAN ── -->
+    <!-- ── MODAL: PETA LOKASI PENUGASAN ── -->
     <Teleport to="body">
       <div
         v-if="isMapModalOpen"

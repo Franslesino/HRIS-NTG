@@ -11,12 +11,15 @@ import {
   CalendarCheck,
   FileCheck2,
   ChevronDown,
-  UserCheck
+  UserCheck,
+  ArrowLeftRight
 } from 'lucide-vue-next';
 
 const route = useRoute();
 const isRosterOpen = ref(true);
 const isAttendanceOpen = ref(true);
+const isJadwalKerjaOpen = ref(true);
+const isTukarShiftOpen = ref(false);
 
 const currentRole = ref('admin');
 
@@ -179,56 +182,36 @@ const isSubActive = (prefix: string) => route.path.startsWith(prefix);
         </button>
 
         <div v-show="isRosterOpen" class="pl-9 pr-2 py-1 space-y-1">
-          <router-link
-            to="/roster/tim"
-            :class="[
-              'flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors',
-              isActive('/roster/tim')
-                ? 'bg-blue-50 text-bmis-blue font-bold'
-                : 'text-slate-500 hover:text-bmis-blue hover:bg-slate-50'
-            ]"
-          >
-            <Users :size="14" />
-            <span>Rotasi & Tim Kerja</span>
-          </router-link>
+          <!-- Jadwal Kerja -->
           <router-link
             to="/roster/admin"
             :class="[
-              'flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors',
-              isActive('/roster/admin')
+              'flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-xs font-semibold transition-colors',
+              (isActive('/roster/admin') || isActive('/roster/admin/atur-shift') || isActive('/roster/tambah'))
                 ? 'bg-blue-50 text-bmis-blue font-bold'
-                : 'text-slate-500 hover:text-bmis-blue hover:bg-slate-50'
+                : 'text-slate-600 hover:text-bmis-blue hover:bg-slate-50'
             ]"
           >
-            <CalendarDays :size="14" />
-            <span>Data Roster Karyawan</span>
+            <Users :size="15" />
+            <span>Jadwal Kerja</span>
           </router-link>
+
+          <!-- Tukar Shift -->
           <router-link
-            to="/roster/tambah"
+            to="/roster/admin/tukar-shift"
             :class="[
-              'flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors',
-              isActive('/roster/tambah')
+              'flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-xs font-semibold transition-colors',
+              (isActive('/roster/tukar-shift') || isActive('/roster/admin/tukar-shift'))
                 ? 'bg-blue-50 text-bmis-blue font-bold'
-                : 'text-slate-500 hover:text-bmis-blue hover:bg-slate-50'
+                : 'text-slate-600 hover:text-bmis-blue hover:bg-slate-50'
             ]"
           >
-            <CalendarPlus :size="14" />
-            <span>+ Tambah Jadwal Shift</span>
-          </router-link>
-          <router-link
-            to="/roster/user"
-            :class="[
-              'flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors',
-              isActive('/roster/user')
-                ? 'bg-blue-50 text-bmis-blue font-bold'
-                : 'text-slate-500 hover:text-bmis-blue hover:bg-slate-50'
-            ]"
-          >
-            <Briefcase :size="14" />
-            <span>Jadwal Roster Saya</span>
+            <ArrowLeftRight :size="15" />
+            <span>Tukar Shift</span>
           </router-link>
         </div>
       </div>
+
 
       <!-- Jika Role Pegawai: Hanya Jadwal Roster Saya (BIRU saat aktif) -->
       <router-link
@@ -247,16 +230,16 @@ const isSubActive = (prefix: string) => route.path.startsWith(prefix);
 
       <!-- Lembur / SPKL (BIRU saat aktif) -->
       <router-link
-        to="/lembur"
+        :to="isSuperAdmin ? '/lembur/admin' : '/lembur/user'"
         :class="[
           'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors',
-          isActive('/lembur')
+          isSubActive('/lembur')
             ? 'bg-blue-50 text-bmis-blue font-bold shadow-xs'
             : 'text-slate-600 hover:bg-slate-50 hover:text-bmis-blue'
         ]"
       >
-        <FileCheck2 :size="18" />
-        <span>Manajemen Lembur</span>
+        <Clock :size="18" />
+        <span>Lembur</span>
       </router-link>
     </nav>
 

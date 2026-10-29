@@ -46,20 +46,24 @@ const switchToAdmin = () => {
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new Event('bmis-role-changed'));
   }
-  router.push('/presensi/admin');
+  if (router.currentRoute.value.path.startsWith('/lembur')) {
+    router.push('/lembur/admin');
+  } else {
+    router.push('/presensi/admin');
+  }
 };
 
 const switchToEmployee = () => {
   isDropdownOpen.value = false;
   const newU = {
-    username: 'asep_milo',
-    name: 'Asep Milo',
-    initials: 'AM',
+    username: 'budi_raharjo',
+    name: 'Budi Raharjo',
+    initials: 'BR',
     role: 'employee',
-    roleLabel: 'Karyawan / Engineering',
+    roleLabel: 'Teknisi Senior ME',
     superadmin: 0,
-    id: 'usr-employee-asep',
-    nip: 'CS.50101',
+    id: 'usr-employee-budi',
+    nip: 'CS.38910',
     divisi: 'Engineering',
   };
   localStorage.setItem('bmis_user', JSON.stringify(newU));
@@ -67,7 +71,11 @@ const switchToEmployee = () => {
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new Event('bmis-role-changed'));
   }
-  router.push('/presensi/user');
+  if (router.currentRoute.value.path.startsWith('/lembur')) {
+    router.push('/lembur/user');
+  } else {
+    router.push('/presensi/user');
+  }
 };
 
 const switchRole = () => {
@@ -121,7 +129,7 @@ const handleLogout = () => {
               : 'text-slate-600 hover:text-slate-900'
           ]"
         >
-          Mode Pegawai (Asep Milo)
+          Mode Pegawai (Budi Raharjo)
         </button>
       </div>
     </div>
